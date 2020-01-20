@@ -56,6 +56,33 @@ router.post('/', (req, res) => {
         });
 });
 
+//update() accepts id and changes, returns object with ID
+router.put('/:id', (req, res) => {
+    const updatePost = req.body;
+    const { id } = req.params;
 
+    if (!updatePost.hasOwnProperty('title')) {
+        res.status(400).json({ errorMessage: "Please provide title for the post" })
+    }
+    if (!updatePost.hasOwnProperty('contents')) {
+        res.status(400).json({ errorMessage: "Please provide contents for the post" })
+    }
+
+    db.update(id, updatePost)
+        .then(update => {
+            if (update) {
+                const updatedPost = {...updatePost, id: Number(id)}
+                res.status(200).json({ success: true, updatedPost, update })
+            } else {
+                res.status(404).json({ success: false, message: "The post with the specified ID does not exist." })
+            }
+        })
+        .catch(err => {
+            console.log("update post error: ", err);
+            res.status(500).json({ success: false, error: "The post information could not be modified." })
+        })
+
+
+})
 
 module.exports = router;
