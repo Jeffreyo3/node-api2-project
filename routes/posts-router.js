@@ -71,7 +71,7 @@ router.put('/:id', (req, res) => {
     db.update(id, updatePost)
         .then(update => {
             if (update) {
-                const updatedPost = {...updatePost, id: Number(id)}
+                const updatedPost = { ...updatePost, id: Number(id) }
                 res.status(200).json({ success: true, updatedPost, update })
             } else {
                 res.status(404).json({ success: false, message: "The post with the specified ID does not exist." })
@@ -81,8 +81,24 @@ router.put('/:id', (req, res) => {
             console.log("update post error: ", err);
             res.status(500).json({ success: false, error: "The post information could not be modified." })
         })
+});
 
+//remove() take id and returns record of deletion (1 if successful)
+router.delete('/:id', (req, res) => {
+    const { id } = req.params;
 
+    db.remove(id)
+        .then(remove => {
+            if (remove) {
+                res.status(200).json({ success: true, remove })
+            } else {
+                res.status(404).json({ success: false, message: "The post with the specified ID does not exist." })
+            }
+        })
+        .catch(err => {
+            console.log("remove post error: ", err);
+            res.status(500).json({ success: false, error: "The post could not be removed" })
+        })
 })
 
 module.exports = router;
