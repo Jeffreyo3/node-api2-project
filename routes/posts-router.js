@@ -121,10 +121,30 @@ router.get("/:id/comments", (req, res) => {
     });
 });
 
+//findCommentById() accepts a comment id & returns comment associated with that id
+router.get("/:post_id/comments/:id", (req, res) => {
+    const post_id = req.params.post_id;
+    const id = req.params.id;
+
+    db.findById(post_id)
+        if (!post_id) {
+            res.status(404).json({ success: false, message: "The post with the specified ID does not exist." })
+        } else {
+            db.findCommentById(id)
+                .then(comment => {
+                    res.status(200).json(comment);
+                })
+                .catch(err => {
+                    console.log('findCommentById error: ', err);
+                    res.status(500).json({ success: false, error: "The comments information could not be retrieved." })
+                })
+        }
+});
+
 //insertComment() - pass in a comment, will return object with id of inserted comment. Throws an error if post_id doesn't match a post id
-router.post("/:id/comments", (req, res) => {
+router.post("/:post_id/comments", (req, res) => {
     const { text } = req.body;
-    const post_id = req.params.id;
+    const post_id = req.params.post_id;
 
     if (!text) {
         res.status(400).json({ success: false, errorMessage: "Please provide text for the comment." });
@@ -144,15 +164,12 @@ router.post("/:id/comments", (req, res) => {
                         });
                     })
                     .catch(err => {
+                        console.lot('insertComment error: ', err);
                         res.status(500).json({ success: false, error: "There was an error while saving the comment to the database" });
                     });
             }
         });
     }
 });
-
-
-
-
 
 module.exports = router;
