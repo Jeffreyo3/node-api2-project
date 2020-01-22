@@ -101,7 +101,7 @@ router.delete('/:id', (req, res) => {
         })
 })
 
-//findPostComments() accepts postId and rturns comments on associated post
+//findPostComments() accepts postId and returns comments on associated post
 router.get("/:id/comments", (req, res) => {
     const { id } = req.params;
 
@@ -120,5 +120,39 @@ router.get("/:id/comments", (req, res) => {
         }
     });
 });
+
+//insertComment() - pass in a comment, will return object with id of inserted comment. Throws an error if post_id doesn't match a post id
+router.post("/:id/comments", (req, res) => {
+    const { text } = req.body;
+    const post_id = req.params.id;
+
+    if (!text) {
+        res.status(400).json({ success: false, errorMessage: "Please provide text for the comment." });
+    } else {
+        db.findById(post_id).then(post => {
+            if (!post) {
+                res.status(404).json({ success: false, message: "The post with the specified ID does not exist." });
+            } else {
+                let newComment = {
+                    text: text,
+                    post_id: post_id
+                };
+                db.insertComment(newComment)
+                    .then(({ id }) => {
+                        db.findCommentById(id).then(comment => {
+                            res.status(201).json(comment);
+                        });
+                    })
+                    .catch(err => {
+                        res.status(500).json({ success: false, error: "There was an error while saving the comment to the database" });
+                    });
+            }
+        });
+    }
+});
+
+
+
+
 
 module.exports = router;
